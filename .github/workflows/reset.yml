@@ -1,0 +1,33 @@
+name: Reset Commit History
+
+on:
+  workflow_dispatch: # Manually triggered
+
+jobs:
+  reset-history:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch full history for rewriting
+
+      - name: Remove Commit History
+        run: |
+          # Configure Git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create a new orphan branch
+          git checkout --orphan temp-branch
+
+          # Add all files and commit
+          git add -A
+          git commit -m "Reset commit history"
+
+          # Delete old branch and push new one
+          git branch -D main
+          git branch -m main
+          git push --force origin main
+
+          echo "Commit history has been reset."
